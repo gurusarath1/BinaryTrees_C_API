@@ -218,12 +218,12 @@ void PreOrderTraversal(NODE* root)
 
     if(root->Left->Height != NO_NODE_HEIGHT)
     {
-        InOrderTraversal(root->Left);
+        PreOrderTraversal(root->Left);
     }
 
     if(root->Right->Height != NO_NODE_HEIGHT)
     {
-        InOrderTraversal(root->Right);
+        PreOrderTraversal(root->Right);
     }
 }
 
@@ -231,12 +231,12 @@ void PostOrderTraversal(NODE* root)
 {
     if(root->Left->Height != NO_NODE_HEIGHT)
     {
-        InOrderTraversal(root->Left);
+        PostOrderTraversal(root->Left);
     }
 
     if(root->Right->Height != NO_NODE_HEIGHT)
     {
-        InOrderTraversal(root->Right);
+        PostOrderTraversal(root->Right);
     }
 
     if(root->Height != NO_NODE_HEIGHT)
