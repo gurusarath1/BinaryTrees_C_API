@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #define NO_VAL 0
 #define NO_NODE_HEIGHT -1
+#define ACTIVATED 1
+#define DEACTIVATED 0
+#define __DebugMode__ if(DebugModeState)
 
 typedef int DataType;
 typedef struct NODE NODE;
@@ -26,13 +29,12 @@ void PreOrderTraversal(NODE* root);
 void PostOrderTraversal(NODE* root);
 
 static NODE NO_NODE;
+static int DebugModeState = DEACTIVATED;
 
 int main()
 {
     NODE BT = Create_BT(5);
     NO_NODE.Height = NO_NODE_HEIGHT;
-
-    printf("%d\n", BT.Value);
 
     BST_insert(&BT, 6, BT.Depth + 1);
     BST_insert(&BT, 3, BT.Depth + 1);
@@ -42,8 +44,6 @@ int main()
     BST_insert(&BT, 2, BT.Depth + 1);
     BST_insert(&BT, 4, BT.Depth + 1);
     BST_insert(&BT, 9, BT.Depth + 1);
-
-    printf("\n\n%d\n",BT.Height);
 
 PreOrderTraversal(&BT);
 
@@ -150,9 +150,12 @@ int BST_insert(NODE* Parent, DataType ValueToInsert, int DepthNext)
             setNodeHeight(NewLeftNodeToInsert);
             Parent->Left = NewLeftNodeToInsert;
             updateHeightsOfAllNodesAbove(Parent->Left);
+
+            __DebugMode__
             printf("Left%d\n", ValueToInsert);
         } else {
 
+            __DebugMode__
             printf("Left -- ");
             BST_insert(Parent->Left, ValueToInsert, DepthNext+1);
 
@@ -171,8 +174,11 @@ int BST_insert(NODE* Parent, DataType ValueToInsert, int DepthNext)
             setNodeHeight(NewRightNodeToInsert);
             Parent->Right = NewRightNodeToInsert;
             updateHeightsOfAllNodesAbove(Parent->Right);
+
+            __DebugMode__
             printf("Right%d\n", ValueToInsert);
         } else {
+            __DebugMode__
             printf("Right -- ");
             BST_insert(Parent->Right, ValueToInsert, DepthNext+1);
 
@@ -198,7 +204,8 @@ void InOrderTraversal(NODE* root)
 
     if(root->Height != NO_NODE_HEIGHT)
     {
-        printf("%d", root->Value);
+        __DebugMode__
+        printf("%d  Height: %d  Depth: %d\n", root->Value, root->Height, root->Depth);
     }
 
     if(root->Right->Height != NO_NODE_HEIGHT)
@@ -213,7 +220,8 @@ void PreOrderTraversal(NODE* root)
 
     if(root->Height != NO_NODE_HEIGHT)
     {
-        printf("%d", root->Value);
+        __DebugMode__
+        printf("%d  Height: %d  Depth: %d\n", root->Value, root->Height, root->Depth);
     }
 
     if(root->Left->Height != NO_NODE_HEIGHT)
@@ -241,6 +249,7 @@ void PostOrderTraversal(NODE* root)
 
     if(root->Height != NO_NODE_HEIGHT)
     {
-        printf("%d", root->Value);
+        __DebugMode__
+        printf("%d  Height: %d  Depth: %d\n", root->Value, root->Height, root->Depth);
     }
 }
