@@ -8,44 +8,66 @@
 
 typedef int DataType;
 typedef struct NODE NODE;
-typedef struct NODE {
+struct NODE {
     int Height;
     int Depth;
+    int TotalNumberOfNodes;
     NODE* Left;
     NODE* Right;
     NODE* Parent;
     DataType Value;
 
-}NODE;
+};
+
+typedef enum DIRECTION
+{
+    LEFT = 0,
+    RIGHT,
+    UP,
+    DOWM,
+}DIRECTION;
 
 NODE Create_BT(DataType rootNodeValue);
 int CompareNodes(NODE* a, NODE* b);
 NODE Create_Node(DataType NodeValue, NODE* Left, NODE* Right, NODE* Parent, int Height);
-int BST_insert(NODE* Parent, DataType ValueToInsert, int DepthNext);
+int BST_insert(NODE* Parent, DataType ValueToInsert);
 int setNodeHeight(NODE* NODEX);
 void updateHeightsOfAllNodesAbove(NODE* LeafNodeX);
-void InOrderTraversal(NODE* root);
-void PreOrderTraversal(NODE* root);
-void PostOrderTraversal(NODE* root);
+void InOrderTraversal(NODE* root, DataType* aryX);
+void PreOrderTraversal(NODE* root, DataType* aryX);
+void PostOrderTraversal(NODE* root, DataType* aryX);
+DataType* createArrayForTraversal(NODE* root);
+void insertInGlobalArray(DataType* aryX, DataType val, int resetIndex);
+
+void L_rotate(NODE* nodeX, DIRECTION aboutNodeOn);
 
 static NODE NO_NODE;
-static int DebugModeState = DEACTIVATED;
+static int DebugModeState = ACTIVATED;
 
 int main()
 {
     NODE BT = Create_BT(5);
-    NO_NODE.Height = NO_NODE_HEIGHT;
 
-    BST_insert(&BT, 6, BT.Depth + 1);
-    BST_insert(&BT, 3, BT.Depth + 1);
-    BST_insert(&BT, 7, BT.Depth + 1);
-    BST_insert(&BT, 10, BT.Depth + 1);
-    BST_insert(&BT, 1, BT.Depth + 1);
-    BST_insert(&BT, 2, BT.Depth + 1);
-    BST_insert(&BT, 4, BT.Depth + 1);
-    BST_insert(&BT, 9, BT.Depth + 1);
 
-PreOrderTraversal(&BT);
+    BST_insert(&BT, 6);
+    BST_insert(&BT, 3);
+    BST_insert(&BT, 7);
+    BST_insert(&BT, 10);
+    BST_insert(&BT, 1);
+    BST_insert(&BT, 2);
+    BST_insert(&BT, 24);
+    BST_insert(&BT, 9);
+    BST_insert(&BT, 9);
+    BST_insert(&BT, 15);
+
+    DataType* aryX = createArrayForTraversal(&BT);
+    insertInGlobalArray(0,0,1);
+    InOrderTraversal(&BT, aryX);
+
+    for(int i=0; i<11; i++)
+    {
+        printf("%d   ", aryX[i]);
+    }
 
 
     return 0;
@@ -54,33 +76,21 @@ PreOrderTraversal(&BT);
 int CompareNodes(NODE* a, NODE* b)
 {
     if(a->Value > b->Value)
-    {
         return 1;
-    }
     else if(a->Value < b->Value)
-    {
         return -1;
-    }
     else
-    {
         return 0;
-    }
 }
 
 int CompareValues(DataType* a, DataType* b)
 {
     if( *a > *b )
-    {
         return 1;
-    }
     else if( *a < *b )
-    {
         return -1;
-    }
     else
-    {
         return 0;
-    }
 }
 
 
@@ -107,10 +117,14 @@ int setNodeHeight(NODE* NodeX)
 NODE Create_BT(DataType rootNodeValue)
 {
     NODE x;
+
+    NO_NODE.Height = NO_NODE_HEIGHT;
+
     x.Left = &NO_NODE;
     x.Right = &NO_NODE;
     x.Parent = &NO_NODE;
     x.Value = rootNodeValue;
+    x.TotalNumberOfNodes = 0;
     setNodeHeight(&x);
     x.Depth = 0;
 
@@ -135,8 +149,11 @@ NODE Create_Node(DataType NodeValue, NODE* Left, NODE* Right, NODE* Parent, int 
 
 
 
-int BST_insert(NODE* Parent, DataType ValueToInsert, int DepthNext)
+int BST_insert(NODE* Parent, DataType ValueToInsert)
 {
+    Parent->TotalNumberOfNodes += 1;
+    int DepthNext = Parent->Depth + 1;
+
     if( CompareValues(&(Parent->Value), &ValueToInsert) > 0 )
     {
         if(Parent->Left == &NO_NODE)
@@ -157,7 +174,7 @@ int BST_insert(NODE* Parent, DataType ValueToInsert, int DepthNext)
 
             __DebugMode__
             printf("Left -- ");
-            BST_insert(Parent->Left, ValueToInsert, DepthNext+1);
+            BST_insert(Parent->Left, ValueToInsert);
 
         }
     }
@@ -180,7 +197,7 @@ int BST_insert(NODE* Parent, DataType ValueToInsert, int DepthNext)
         } else {
             __DebugMode__
             printf("Right -- ");
-            BST_insert(Parent->Right, ValueToInsert, DepthNext+1);
+            BST_insert(Parent->Right, ValueToInsert);
 
         }
     }
@@ -195,61 +212,130 @@ void updateHeightsOfAllNodesAbove(NODE* LeafNodeX)
     }
 }
 
-void InOrderTraversal(NODE* root)
+void InOrderTraversal(NODE* root, DataType* aryX)
 {
     if(root->Left->Height != NO_NODE_HEIGHT)
     {
-        InOrderTraversal(root->Left);
+        InOrderTraversal(root->Left, aryX);
     }
 
     if(root->Height != NO_NODE_HEIGHT)
     {
         __DebugMode__
-        printf("%d  Height: %d  Depth: %d\n", root->Value, root->Height, root->Depth);
+        printf("%d  Height: %d  Depth: %d  NumNodes: %d\n", root->Value, root->Height, root->Depth, root->TotalNumberOfNodes);
+        insertInGlobalArray(aryX, root->Value, 0);
     }
 
     if(root->Right->Height != NO_NODE_HEIGHT)
     {
-        InOrderTraversal(root->Right);
+        InOrderTraversal(root->Right, aryX);
     }
 
 }
 
-void PreOrderTraversal(NODE* root)
+void PreOrderTraversal(NODE* root, DataType* aryX)
 {
 
     if(root->Height != NO_NODE_HEIGHT)
     {
         __DebugMode__
-        printf("%d  Height: %d  Depth: %d\n", root->Value, root->Height, root->Depth);
+        printf("%d  Height: %d  Depth: %d  NumNodes: %d\n", root->Value, root->Height, root->Depth, root->TotalNumberOfNodes);
+        insertInGlobalArray(aryX, root->Value, 0);
     }
 
     if(root->Left->Height != NO_NODE_HEIGHT)
     {
-        PreOrderTraversal(root->Left);
+        PreOrderTraversal(root->Left, aryX);
     }
 
     if(root->Right->Height != NO_NODE_HEIGHT)
     {
-        PreOrderTraversal(root->Right);
+        PreOrderTraversal(root->Right, aryX);
     }
 }
 
-void PostOrderTraversal(NODE* root)
+void PostOrderTraversal(NODE* root, DataType* aryX)
 {
     if(root->Left->Height != NO_NODE_HEIGHT)
     {
-        PostOrderTraversal(root->Left);
+        PostOrderTraversal(root->Left, aryX);
     }
 
     if(root->Right->Height != NO_NODE_HEIGHT)
     {
-        PostOrderTraversal(root->Right);
+        PostOrderTraversal(root->Right, aryX);
     }
 
     if(root->Height != NO_NODE_HEIGHT)
     {
         __DebugMode__
-        printf("%d  Height: %d  Depth: %d\n", root->Value, root->Height, root->Depth);
+        printf("%d  Height: %d  Depth: %d  NumNodes: %d\n", root->Value, root->Height, root->Depth, root->TotalNumberOfNodes);
+        insertInGlobalArray(aryX, root->Value, 0);
     }
 }
+
+DataType* createArrayForTraversal(NODE* root)
+{
+    __DebugMode__
+    printf("array size created = %d \n", root->TotalNumberOfNodes);
+    return (DataType*)malloc(root->TotalNumberOfNodes * sizeof(DataType));
+}
+
+void insertInGlobalArray(DataType* aryX, DataType val, int resetIndex)
+{
+    static int index = 0;
+
+    if(resetIndex)
+    {
+        index = 0;
+
+    } else {
+
+        aryX[index] = val;
+        index += 1;
+
+    }
+
+}
+
+// AVL -------------------
+
+
+void Left_rotate(NODE* nodeX)
+{
+    nodeX->Parent->Right = nodeX->Right;
+    nodeX->Right->Left = nodeX;
+    nodeX->Right->Parent = nodeX->Parent;
+    nodeX->Parent = nodeX->Right;
+    nodeX->Right = &NO_NODE;
+}
+
+void Right_rotate(NODE* nodeX)
+{
+    nodeX->Parent->Left = nodeX->Left;
+    nodeX->Left->Right = nodeX;
+    nodeX->Left->Parent = nodeX->Parent;
+    nodeX->Parent = nodeX->Left;
+    nodeX->Left = &NO_NODE;
+}
+
+void RL_rotate(NODE* nodeX)
+{
+    Right_rotate(nodeX->Right);
+    Left_rotate(nodeX);
+}
+
+void LR_rotate(NODE* nodeX)
+{
+    Left_rotate(nodeX->Left);
+    Right_rotate(nodeX);
+}
+
+int BalanceFactor(NODE* nodeX)
+{
+    return (nodeX->Left->Height - nodeX->Right->Height);
+}
+
+
+
+
