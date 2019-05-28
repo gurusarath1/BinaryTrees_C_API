@@ -27,7 +27,7 @@ typedef enum DIRECTION
     DOWM,
 }DIRECTION;
 
-NODE Create_BT(DataType rootNodeValue);
+NODE* Create_BT(DataType rootNodeValue);
 int CompareNodes(NODE* a, NODE* b);
 NODE Create_Node(DataType NodeValue, NODE* Left, NODE* Right, NODE* Parent, int Height);
 int BST_insert(NODE* Parent, DataType ValueToInsert);
@@ -46,23 +46,23 @@ static int DebugModeState = ACTIVATED;
 
 int main()
 {
-    NODE BT = Create_BT(5);
+    NODE* BT = Create_BT(5);
 
 
-    BST_insert(&BT, 6);
-    BST_insert(&BT, 3);
-    BST_insert(&BT, 7);
-    BST_insert(&BT, 10);
-    BST_insert(&BT, 1);
-    BST_insert(&BT, 2);
-    BST_insert(&BT, 24);
-    BST_insert(&BT, 9);
-    BST_insert(&BT, 9);
-    BST_insert(&BT, 15);
+    BST_insert(BT, 6);
+    BST_insert(BT, 3);
+    BST_insert(BT, 7);
+    BST_insert(BT, 10);
+    BST_insert(BT, 1);
+    BST_insert(BT, 2);
+    BST_insert(BT, 24);
+    BST_insert(BT, 9);
+    BST_insert(BT, 9);
+    BST_insert(BT, 15);
 
-    DataType* aryX = createArrayForTraversal(&BT);
+    DataType* aryX = createArrayForTraversal(BT);
     insertInGlobalArray(0,0,1);
-    InOrderTraversal(&BT, aryX);
+    InOrderTraversal(BT, aryX);
 
     for(int i=0; i<11; i++)
     {
@@ -114,19 +114,19 @@ int setNodeHeight(NODE* NodeX)
 
 
 
-NODE Create_BT(DataType rootNodeValue)
+NODE* Create_BT(DataType rootNodeValue)
 {
-    NODE x;
+    NODE* x = (NODE*) malloc(sizeof(NODE));
 
     NO_NODE.Height = NO_NODE_HEIGHT;
 
-    x.Left = &NO_NODE;
-    x.Right = &NO_NODE;
-    x.Parent = &NO_NODE;
-    x.Value = rootNodeValue;
-    x.TotalNumberOfNodes = 0;
-    setNodeHeight(&x);
-    x.Depth = 0;
+    x->Left = &NO_NODE;
+    x->Right = &NO_NODE;
+    x->Parent = &NO_NODE;
+    x->Value = rootNodeValue;
+    x->TotalNumberOfNodes = 0;
+    setNodeHeight(x);
+    x->Depth = 0;
 
     return x;
 }
@@ -298,25 +298,31 @@ void insertInGlobalArray(DataType* aryX, DataType val, int resetIndex)
 
 }
 
-// AVL -------------------
+// AVL TREE FUNCTIONS -------------------
 
 
 void Left_rotate(NODE* nodeX)
 {
+    NODE* temp = nodeX->Right->Left;
+
     nodeX->Parent->Right = nodeX->Right;
     nodeX->Right->Left = nodeX;
     nodeX->Right->Parent = nodeX->Parent;
     nodeX->Parent = nodeX->Right;
-    nodeX->Right = &NO_NODE;
+    nodeX->Right = temp;
+    temp->Parent = nodeX;
 }
 
 void Right_rotate(NODE* nodeX)
 {
-    nodeX->Parent->Left = nodeX->Left;
+    NODE* temp = nodeX->Left->Right;
+
+    nodeX->Parent->Left = nodeX->Left
     nodeX->Left->Right = nodeX;
     nodeX->Left->Parent = nodeX->Parent;
     nodeX->Parent = nodeX->Left;
-    nodeX->Left = &NO_NODE;
+    nodeX->Left = temp;
+    temp->Parent = nodeX;
 }
 
 void RL_rotate(NODE* nodeX)
