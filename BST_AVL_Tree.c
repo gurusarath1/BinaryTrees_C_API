@@ -30,7 +30,7 @@ typedef enum DIRECTION
 NODE* Create_BT(DataType rootNodeValue);
 int CompareNodes(NODE* a, NODE* b);
 NODE Create_Node(DataType NodeValue, NODE* Left, NODE* Right, NODE* Parent, int Height);
-int BST_insert(NODE* Parent, DataType ValueToInsert);
+NODE* BST_insert(NODE* Parent, DataType ValueToInsert);
 int setNodeHeight(NODE* NODEX);
 void updateHeightsOfAllNodesAbove(NODE* LeafNodeX);
 void InOrderTraversal(NODE* root, DataType* aryX);
@@ -39,7 +39,13 @@ void PostOrderTraversal(NODE* root, DataType* aryX);
 DataType* createArrayForTraversal(NODE* root);
 void insertInGlobalArray(DataType* aryX, DataType val, int resetIndex);
 
-void L_rotate(NODE* nodeX, DIRECTION aboutNodeOn);
+void Left_rotate(NODE* nodeX);
+void Right_rotate(NODE* nodeX);
+void RL_rotate(NODE* nodeX);
+void LR_rotate(NODE* nodeX);
+int BalanceFactor(NODE* nodeX);
+NODE* AVL_insert(NODE* Parent, DataType ValueToInsert);
+
 
 static NODE NO_NODE;
 static int DebugModeState = ACTIVATED;
@@ -149,7 +155,7 @@ NODE Create_Node(DataType NodeValue, NODE* Left, NODE* Right, NODE* Parent, int 
 
 
 
-int BST_insert(NODE* Parent, DataType ValueToInsert)
+NODE* BST_insert(NODE* Parent, DataType ValueToInsert)
 {
     Parent->TotalNumberOfNodes += 1;
     int DepthNext = Parent->Depth + 1;
@@ -170,6 +176,9 @@ int BST_insert(NODE* Parent, DataType ValueToInsert)
 
             __DebugMode__
             printf("Left%d\n", ValueToInsert);
+
+            return NewLeftNodeToInsert;
+
         } else {
 
             __DebugMode__
@@ -194,6 +203,9 @@ int BST_insert(NODE* Parent, DataType ValueToInsert)
 
             __DebugMode__
             printf("Right%d\n", ValueToInsert);
+
+            return NewRightNodeToInsert;
+
         } else {
             __DebugMode__
             printf("Right -- ");
@@ -315,9 +327,11 @@ void Left_rotate(NODE* nodeX)
 
 void Right_rotate(NODE* nodeX)
 {
+    // nodeX is a left child
+
     NODE* temp = nodeX->Left->Right;
 
-    nodeX->Parent->Left = nodeX->Left
+    nodeX->Parent->Left = nodeX->Left;
     nodeX->Left->Right = nodeX;
     nodeX->Left->Parent = nodeX->Parent;
     nodeX->Parent = nodeX->Left;
@@ -342,6 +356,19 @@ int BalanceFactor(NODE* nodeX)
     return (nodeX->Left->Height - nodeX->Right->Height);
 }
 
+NODE* AVL_insert(NODE* Parent, DataType ValueToInsert)
+{
+    NODE* insertedNode = BST_insert(Parent, ValueToInsert);
+
+    NODE* ParentNodeX = insertedNode->Parent;
+
+    while(BalanceFactor(ParentNodeX) > 1)
+    {
+        ParentNodeX = ParentNodeX->Parent;
+    }
+
+    return ParentNodeX;
+}
 
 
 
